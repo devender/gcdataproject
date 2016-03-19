@@ -104,9 +104,7 @@ runScript <- function() {
     names(Data)<-gsub("-mean\\(\\)", "Mean", names(Data))
     
     Data2<-Data %>% group_by(subject,activity) %>% summarise_each(funs(mean))
-    write.table(Data2,"data/UCI HAR Dataset/grouped_by_subject_and_activity.csv")
-    View(Data2)
-    Data2
+    write.table(Data2,"data/UCI HAR Dataset/grouped_by_subject_and_activity.txt",row.names = FALSE)
     #rm(list=ls())
     #gc()
 }
