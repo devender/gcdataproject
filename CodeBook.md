@@ -85,6 +85,19 @@ features.
         Data<-cbind(cbind(subjects,all_activities),features)
         sample_n(Data,2)
 
+### Sample Output
+    ##       subject           activity timeBodyAccelerometerMean-X timeBodyAccelerometerMean-Y timeBodyAccelerometerMean-Z
+    ##         (int)             (fctr)                       (dbl)                       (dbl)                       (dbl)
+    ##1        1            WALKING                   0.2773308                -0.017383819                  -0.1111481
+    ##2        1   WALKING_UPSTAIRS                   0.2554617                -0.023953149                  -0.0973020
+    ##3        1 WALKING_DOWNSTAIRS                   0.2891883                -0.009918505                  -0.1075662
+    ##4        1            SITTING                   0.2612376                -0.001308288                  -0.1045442
+    ##5        1           STANDING                   0.2789176                -0.016137590                  -0.1106018
+    ##6        1             LAYING                   0.2215982                -0.040513953                  -0.1132036
+    ##7        2            WALKING                   0.2764266                -0.018594920                  -0.1055004
+    ##8        2   WALKING_UPSTAIRS                   0.2471648                -0.021412113                  -0.1525139        
+
+### Descriotion of variables
     ##      subject activity tBodyAcc-mean()-X tBodyAcc-mean()-Y
     ## 3855       5   LAYING         0.2561251       -0.01319197
     ## 9106      27   LAYING         0.2789679       -0.01749688
