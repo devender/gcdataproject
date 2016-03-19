@@ -8,3 +8,23 @@ Data source
 
 As described in the instructions the code was downloaded from
 <https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip>
+
+Transformations
+---------------
+
+### Stage 1
+
+Read both the test and training files for activity
+
+        test_activity <- read.table("data/UCI HAR Dataset/test/Y_test.txt")
+        train_activity <- read.table("data/UCI HAR Dataset/train/Y_train.txt")
+
+Combine into a single table.
+
+        all_activities <- rbind(test_activity,train_activity)
+        names(all_activities)<-c("activity")
+
+Convert activities into readable labels
+
+        activity_labels <- read.table("data/UCI HAR Dataset/activity_labels.txt")
+        all_activities$activity <- factor(all_activities$activity, levels=activity_labels[,1], labels = activity_labels[,2])
