@@ -1,0 +1,10 @@
+Codebook
+--------
+
+Codebook for assignment: "Getting and Cleaning Data Course Project"
+
+Data source
+-----------
+
+As described in the instructions the code was downloaded from
+<https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip>

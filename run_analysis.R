@@ -1,5 +1,5 @@
-#R Script to download and produce a tidy data set
-#course assignment
+#' R Script to download and produce a tidy data set
+
 
 if("futile.logger" %in% rownames(installed.packages()) == FALSE) {
     install.packages("futile.logger")
@@ -10,7 +10,9 @@ if("data.table" %in% rownames(installed.packages()) == FALSE) {
 if("dplyr" %in% rownames(installed.packages()) == FALSE) {
     install.packages("dplyr")
 }
-
+if("knitr" %in% rownames(installed.packages()) == FALSE) {
+    install.packages("knitr")
+}
 library(futile.logger)
 library(data.table)
 library(dplyr)
@@ -43,21 +45,18 @@ runScript <- function() {
     #########################################################
     flog.info("reading activity file for test activity")
     test_activity <- read.table("data/UCI HAR Dataset/test/Y_test.txt")
-    flog.info(str(test_activity))
     
     flog.info("reading activity file for train activity")
     train_activity <- read.table("data/UCI HAR Dataset/train/Y_train.txt")
-    flog.info(str(train_activity))
     
     flog.info("combine test & train activity")
     all_activities <- rbind(test_activity,train_activity)
     names(all_activities)<-c("activity")
-    flog.info(str(all_activities))
     
     flog.info("reading activity labels")
     activity_labels <- read.table("data/UCI HAR Dataset/activity_labels.txt")
-    flog.info(str(activity_labels))
 
+    flog.info("apply activity labels")
     all_activities$activity <- factor(all_activities$activity, levels=activity_labels[,1], labels = activity_labels[,2])
     #View(all_activities)
     
@@ -66,28 +65,23 @@ runScript <- function() {
     #########################################################
     flog.info("reading file for test subject")
     test_subjects <- read.table("data/UCI HAR Dataset/test/subject_test.txt")
-    flog.info(str(test_subjects))
     
     flog.info("reading files for train subject")
     train_subjects <- read.table("data/UCI HAR Dataset/train/subject_train.txt")
-    flog.info(str(train_subjects))
     
     flog.info("combine test & train subject")
     subjects<-rbind(test_subjects,train_subjects)
     names(subjects)<-c("subject")
-    flog.info(str(subjects))
-    View(subjects)
+    #View(subjects)
     
     #########################################################
     # Reading both the test and train features and combine  #
     #########################################################
     flog.info("reading files for test features")
     test_features <- read.table("data/UCI HAR Dataset/test/X_test.txt")
-    flog.info(str(test_features))
     
     flog.info("reading files for train features")
     train_features <- read.table("data/UCI HAR Dataset/train/X_train.txt")
-    flog.info(str(train_features))
     
     flog.info("reading all features names")
     features_names<-fread("data/UCI HAR Dataset/features.txt")
@@ -100,9 +94,18 @@ runScript <- function() {
     features<-subset(features, select=grep(x=colnames(features), "mean\\(\\)|std\\(\\)"))
     
     Data<-cbind(cbind(subjects,all_activities),features)
-    View(Data)
+    names(Data)<-gsub("^t", "time", names(Data))
+    names(Data)<-gsub("^f", "frequency", names(Data))
+    names(Data)<-gsub("Acc", "Accelerometer", names(Data))
+    names(Data)<-gsub("Gyro", "Gyroscope", names(Data))
+    names(Data)<-gsub("Mag", "Magnitude", names(Data))
+    names(Data)<-gsub("BodyBody", "Body", names(Data))
+    names(Data)<-gsub("-std\\(\\)", "StandardDeviation", names(Data))
+    names(Data)<-gsub("-mean\\(\\)", "Mean", names(Data))
+    all_names<-colnames(Data)
+    all_names <- all_names[-which(all_names %in% c("subject","activity"))]
     
-    rm(list=ls())
-    gc()
-    
+    Data2<-Data %>% group_by(subject,activity) %>% summarise_each(funs(mean))
+    write.table(Data2,"data/UCI HAR Dataset/grouped_by_subject_and_activity.csv")
+    View(Data2)
 }
