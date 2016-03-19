@@ -102,10 +102,11 @@ runScript <- function() {
     names(Data)<-gsub("BodyBody", "Body", names(Data))
     names(Data)<-gsub("-std\\(\\)", "StandardDeviation", names(Data))
     names(Data)<-gsub("-mean\\(\\)", "Mean", names(Data))
-    all_names<-colnames(Data)
-    all_names <- all_names[-which(all_names %in% c("subject","activity"))]
     
     Data2<-Data %>% group_by(subject,activity) %>% summarise_each(funs(mean))
     write.table(Data2,"data/UCI HAR Dataset/grouped_by_subject_and_activity.csv")
     View(Data2)
+    Data2
+    #rm(list=ls())
+    #gc()
 }

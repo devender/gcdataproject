@@ -5,6 +5,8 @@ output: md_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(dplyr)
 ```
 
 ## Codebook
@@ -14,23 +16,82 @@ Codebook for assignment: "Getting and Cleaning Data Course Project"
 ## Data source
 
 As described in the instructions the code was downloaded from https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
-
+```{r}
+    if(!file.exists("data/dataset.zip")){ 
+        flog.info("downloading dataset")
+        fileUrl = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+        download.file(fileUrl,"data/dataset.zip",method="curl") 
+    }
+```
 
 ## Transformations
 
 ### Stage 1
-Read both the test and training files for activity
-```(r)
+Read both the test and training files for activity.
+```{r}
     test_activity <- read.table("data/UCI HAR Dataset/test/Y_test.txt")
     train_activity <- read.table("data/UCI HAR Dataset/train/Y_train.txt")
 ```
 Combine into a single table.
-```(r)
+```{r}
     all_activities <- rbind(test_activity,train_activity)
     names(all_activities)<-c("activity")
 ```
-Convert activities into readable labels
-```(r)
+Convert activities into readable labels. See below for sample output
+```{r}
     activity_labels <- read.table("data/UCI HAR Dataset/activity_labels.txt")
     all_activities$activity <- factor(all_activities$activity, levels=activity_labels[,1], labels = activity_labels[,2])
+    sample_n(all_activities,4)
+```
+
+### Stage 2
+Read both the test and training subjects and combine them into a single table. See below for sample output.
+```{r}
+    test_subjects <- read.table("data/UCI HAR Dataset/test/subject_test.txt")
+    train_subjects <- read.table("data/UCI HAR Dataset/train/subject_train.txt")
+    subjects<-rbind(test_subjects,train_subjects)
+    names(subjects)<-c("subject")
+    sample_n(subjects,4)
+```
+
+### Stage 3
+Read both test and training features and combine then into a single table.
+```{r}
+    test_features <- read.table("data/UCI HAR Dataset/test/X_test.txt")
+    train_features <- read.table("data/UCI HAR Dataset/train/X_train.txt")
+    features_names<-fread("data/UCI HAR Dataset/features.txt")
+    features<-rbind(test_features,train_features)
+```
+
+### Stage 4
+From the output of stage 3 only retain features that have the work mean or std in it.
+```{r}
+    names(features)<-features_names$V2
+    features<-subset(features, select=grep(x=colnames(features), "mean\\(\\)|std\\(\\)"))
+```
+
+### Stage 5
+Build a data frame called Data that combines subjects, activities and features.
+```{r}
+    Data<-cbind(cbind(subjects,all_activities),features)
+    sample_n(Data,2)
+```
+
+### Stage 6
+Transform feature names into more descriptive names.
+```{r}
+    names(Data)<-gsub("^t", "time", names(Data))
+    names(Data)<-gsub("^f", "frequency", names(Data))
+    names(Data)<-gsub("Acc", "Accelerometer", names(Data))
+    names(Data)<-gsub("Gyro", "Gyroscope", names(Data))
+    names(Data)<-gsub("Mag", "Magnitude", names(Data))
+    names(Data)<-gsub("BodyBody", "Body", names(Data))
+    names(Data)<-gsub("-std\\(\\)", "StandardDeviation", names(Data))
+    names(Data)<-gsub("-mean\\(\\)", "Mean", names(Data))
+```
+
+### Stage 6
+Group by subject and activity, summarize the features.
+```{r}
+    Data2<-Data %>% group_by(subject,activity) %>% summarise_each(funs(mean))
 ```
